@@ -1,0 +1,40 @@
+........................................................................ [ 44%]
+........................................................................ [ 88%]
+..................                                                       [100%]
+=============================== tests coverage ================================
+______________ coverage: platform win32, python 3.13.12-final-0 _______________
+
+Name                             Stmts   Miss  Cover   Missing
+--------------------------------------------------------------
+app\api\deps.py                     13      0   100%
+app\api\errors.py                   39      2    95%   95-96
+app\api\presenters.py               12      0   100%
+app\api\routes_catalog.py           43      0   100%
+app\api\routes_movements.py         47      0   100%
+app\api\routes_reports.py           61      0   100%
+app\api\schemas.py                 176      0   100%
+app\cli.py                          45      1    98%   69
+app\config.py                       27      2    93%   12, 25
+app\db\models.py                    49      0   100%
+app\db\repositories.py             148      2    99%   85, 95
+app\db\session.py                   30      1    97%   40
+app\db\types.py                     36      4    89%   47, 49, 54, 57
+app\domain\enums.py                 16      0   100%
+app\domain\errors.py                28      0   100%
+app\domain\movements.py            101      1    99%   234
+app\domain\validation.py            43      0   100%
+app\domain\valuation.py             17      0   100%
+app\logging_setup.py                26      0   100%
+app\main.py                         53      3    94%   54-56
+app\seed.py                         57      0   100%
+app\services\catalog.py             89      4    96%   54-55, 106-107
+app\services\clock.py                3      0   100%
+app\services\movements.py           68      1    99%   99
+app\services\reconciliation.py      74      0   100%
+app\services\reports.py             91      0   100%
+--------------------------------------------------------------
+TOTAL                             1392     21    98%
+
+5 empty files skipped.
+Coverage HTML written to dir htmlcov
+162 passed in 23.92s

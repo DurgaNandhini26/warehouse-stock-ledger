@@ -22,7 +22,6 @@ addopts = "-q"
 
 [tool.coverage.run]
 source = ["app"]
-omit = ["app/seed.py"]
 
 [tool.coverage.report]
 show_missing = true
