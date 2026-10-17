@@ -24,3 +24,6 @@ omit = ["app/seed.py"]
 [tool.coverage.report]
 show_missing = true
 skip_empty = true
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
