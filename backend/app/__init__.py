@@ -1,0 +1,1 @@
+"""Warehouse Stock Ledger backend."""
