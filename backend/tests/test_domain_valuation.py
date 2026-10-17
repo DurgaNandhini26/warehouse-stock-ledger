@@ -19,11 +19,11 @@ def test_average_is_weighted_by_quantity():
     assert weighted_average_cost(D(10), D(40), D(30), D(60)) == D("55.0000")
 
 
-def test_average_is_rounded_half_even_to_four_places():
-    # (1 * 1 + 2 * 2) / 3 = 1.66666... -> 1.6667
-    assert weighted_average_cost(D(1), D(1), D(2), D(2)) == D("1.6667")
-    # exact midpoint 0.00005 rounds to even
-    assert weighted_average_cost(D(1), D("0.0001"), D(1), D("0.0000")) == D("0.0000")
+def test_average_is_rounded_half_even_to_eight_places():
+    # (1 * 1 + 2 * 2) / 3 = 1.666666666... -> 1.66666667
+    assert weighted_average_cost(D(1), D(1), D(2), D(2)) == D("1.66666667")
+    # exact midpoint 0.000000005 rounds to even
+    assert weighted_average_cost(D(1), D("0.00000001"), D(1), D(0)) == D("0")
 
 
 def test_receiving_into_empty_stock_ignores_stale_average():
@@ -31,7 +31,9 @@ def test_receiving_into_empty_stock_ignores_stale_average():
 
 
 def test_rounding_error_stays_bounded_after_many_receipts():
-    """1,000 receipts at awkward prices: cached average stays within 0.0001 of the exact value."""
+    """1,000 receipts at awkward prices: cached average stays within 0.000001 of the exact value.
+
+    With 4-decimal rounding this drifted by 0.00033, i.e. visible in the 4th decimal place."""
     on_hand, avg = D(0), D(0)
     exact_value, exact_qty = Fraction(0), Fraction(0)
     for i in range(1000):
@@ -42,7 +44,7 @@ def test_rounding_error_stays_bounded_after_many_receipts():
         exact_value += Fraction(qty) * Fraction(cost)
         exact_qty += Fraction(qty)
     exact_avg = exact_value / exact_qty
-    assert abs(Fraction(avg) - exact_avg) <= Fraction(1, 10_000)
+    assert abs(Fraction(avg) - exact_avg) <= Fraction(1, 1_000_000)
 
 
 def test_movement_value_rounds_to_paise():

@@ -1,7 +1,7 @@
 """Initial schema: products, locations, append-only movements, balance cache.
 
 Decimals are stored as scaled BIGINTs (see app/db/types.py):
-  quantity / reorder_level: x1000, unit_cost / avg_cost: x10000, value: x100.
+  quantity / reorder_level: x1000, unit_cost / avg_cost: x10^8, value: x100.
 
 Revision ID: 0001
 Revises:

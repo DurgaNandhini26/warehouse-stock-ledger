@@ -2,7 +2,7 @@
 
 SQLite has no real DECIMAL type (SQLAlchemy would round-trip through binary floats), so
 decimals are stored as scaled integers: a quantity of 12.345 kg is stored as 12345 with
-scale 3, a cost of Rs 41.2500 as 412500 with scale 4. The same representation is used on
+scale 3, a cost of Rs 41.25 as 4125000000 with scale 8. The same representation is used on
 PostgreSQL so both databases behave identically and SQL SUM() stays exact.
 """
 

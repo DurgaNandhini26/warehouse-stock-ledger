@@ -301,6 +301,15 @@ def test_reversal_of_an_out_valued_at_zero_is_allowed():
     assert plan.deltas == {A: D(4)}
 
 
+def test_reversal_of_an_out_keeps_its_full_precision_cost():
+    request = reversal_request(
+        posted("OUT", from_location_id=A, unit_cost=D("33.33333333")), "undo"
+    )
+    plan = plan_movement(request, KG, {}, is_reversal=True)
+    assert plan.unit_cost == D("33.33333333")
+    assert plan.value == D("133.33")
+
+
 def test_reversing_an_already_reversed_movement_is_rejected():
     with pytest.raises(AlreadyReversed):
         reversal_request(posted("IN", to_location_id=A, reversed_by_movement_id=9), "again")

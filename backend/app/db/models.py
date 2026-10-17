@@ -9,7 +9,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from app.db.types import ScaledDecimal, UTCDateTime
 
 QTY_SCALE = 3  # 0.001 kg / litre; whole numbers enforced for pcs in the domain layer
-COST_SCALE = 4  # unit and average cost, Rs with 4 decimals (1/100 paisa)
+COST_SCALE = 8  # unit and average cost; 8 places so repeated averaging does not drift
 VALUE_SCALE = 2  # money totals, Rs.paise
 
 
