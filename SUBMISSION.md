@@ -43,15 +43,15 @@ the Render/Vercel/Neon dashboards (README 5a).
 
 ## C. The hardest part
 
-The weighted average cost. My first version (`9cc99df`) rounded the average to 4 decimal places
+The weighted average cost. My first version (`9c52617`) rounded the average to 4 decimal places
 after every receipt. That looked reasonable, since it is 1/100 of a paisa. The 1,000-receipt test
-in `tests/test_domain_valuation.py`, written in M1 (`4129375`) before the implementation, compared
+in `tests/test_domain_valuation.py`, written in M1 (`2d25764`) before the implementation, compared
 the cached average with an exact `Fraction` computation and failed: the error was 0.00033, visible
 in the 4th decimal. Each rounding is re-weighted into the next average, so the errors accumulate
 instead of cancelling. I changed the internal precision to 8 decimals (half-even). Users still
 enter costs with at most 4, and money is still rounded to paise. That forced a second change:
 reversing an OUT re-enters its stored 8-decimal cost, so reversals now bypass the 4-decimal input
-check (`is_reversal`). The fix is in the same commit `9cc99df`, and the commit body explains it.
+check (`is_reversal`). The fix is in the same commit `9c52617`, and the commit body explains it.
 Lesson: precision rules for stored derived values differ from those for user input.
 
 ## D. How I handle failure
@@ -67,13 +67,13 @@ Lesson: precision rules for stored derived values differ from those for user inp
 
 | Milestone | Date completed | Commit |
 |---|---|---|
-| M0 Scaffold | 2026-10-17 | `c7f35b9` |
-| M1 Domain model | 2026-10-17 | `4129375` |
-| M2 Business rules | 2026-10-17 | `40b2dfb` |
-| M3 API | 2026-10-17 | `49df00b` |
-| M4 UI | 2026-10-17 | `b8eff26` |
-| M5 Deployment | 2026-10-17 (config + CI); hosting pending | `a4e634c` |
-| M6 Documentation | 2026-10-17 | `01c95f9` (tag `v1.0`) |
+| M0 Scaffold | 2026-10-17 | `0233f78` |
+| M1 Domain model | 2026-10-17 | `2d25764` |
+| M2 Business rules | 2026-10-17 | `1079c12` |
+| M3 API | 2026-10-17 | `aa54309` |
+| M4 UI | 2026-10-17 | `9ff9c98` |
+| M5 Deployment | 2026-10-17 (config + CI); hosting pending | `e2fcbcc` |
+| M6 Documentation | 2026-10-17 | `3b965c7` (tag `v1.0`) |
 
 ## F. If I had two more days
 
