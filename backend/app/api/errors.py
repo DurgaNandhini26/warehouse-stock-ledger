@@ -54,11 +54,18 @@ def _field_name(loc: tuple) -> str:
     return ".".join(parts) or "body"
 
 
+def _problem(error: dict) -> dict[str, str]:
+    # For unparseable JSON the loc is ("body", <character offset>), which is not a field.
+    if error.get("type") == "json_invalid":
+        return {"field": "body", "message": "request body is not valid JSON"}
+    return {
+        "field": _field_name(tuple(error.get("loc", ()))),
+        "message": error.get("msg", "invalid"),
+    }
+
+
 async def _validation_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
-    problems = [
-        {"field": _field_name(tuple(e.get("loc", ()))), "message": e.get("msg", "invalid")}
-        for e in exc.errors()
-    ]
+    problems = [_problem(e) for e in exc.errors()]
     log.info(
         "request validation failed",
         extra={"ctx": {"path": request.url.path, "fields": [p["field"] for p in problems]}},

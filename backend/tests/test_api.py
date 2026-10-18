@@ -359,6 +359,15 @@ def test_malformed_movement_bodies_are_422(client, ids, payload):
     assert_error(r, 422, "VALIDATION_ERROR")
 
 
+def test_unparseable_json_names_the_body_not_a_character_offset(client):
+    r = client.post(
+        "/api/v1/movements", content='{"type": "IN"', headers={"Content-Type": "application/json"}
+    )
+    error = assert_error(r, 422, "VALIDATION_ERROR")
+    assert error["field"] == "body"
+    assert error["message"] == "body: request body is not valid JSON"
+
+
 def test_quantity_far_too_large_is_a_rule_violation(client, ids):
     assert_error(post_in(client, ids, qty="10000000.001"), 422, "INVALID_QUANTITY")
     assert_error(post_in(client, ids, qty="0"), 422, "INVALID_QUANTITY")
