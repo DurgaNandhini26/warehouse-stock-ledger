@@ -4,8 +4,11 @@ services:
   - type: web
     name: stock-ledger-api
     runtime: docker
-    rootDir: backend
-    dockerfilePath: ./Dockerfile
+    # Paths are given from the repo root so they do not depend on how rootDir is resolved.
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    buildFilter:
+      paths: ["backend/**", "render.yaml"]
     plan: free
     region: singapore
     healthCheckPath: /health
