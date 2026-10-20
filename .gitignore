@@ -16,10 +16,11 @@ htmlcov/
 *.db-wal
 *.db-shm
 
-# Env files (only .env.example is committed)
+# Env files: only the example and the public production API URL are committed
 .env
 .env.*
 !.env.example
+!.env.production
 
 # Node / frontend
 node_modules/
