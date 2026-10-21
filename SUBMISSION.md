@@ -9,8 +9,8 @@ by product/location/both, filtered and paginated history, the low-stock report, 
 report and reconcile (read-only check plus repair). All Core UI features are complete: a products ×
 bins grid, one entry form per movement type with inline validation, a product ledger with running
 balance, plus low-stock, valuation and reconcile pages. From the stretch list only the CSV ledger
-export is done. Deployment config is committed, but the hosted instance still has to be created in
-the Render/Vercel/Neon dashboards (README 5a).
+export is done. It is live: UI on Vercel (https://warehouse-stock-ledger.vercel.app), API on Render
+(https://stock-ledger-api-ec7c.onrender.com/docs), database on Neon Postgres.
 
 ## B. Three design decisions
 
@@ -72,21 +72,21 @@ Lesson: precision rules for stored derived values differ from those for user inp
 | M2 Business rules | 2026-10-17 | `1079c12` |
 | M3 API | 2026-10-17 | `aa54309` |
 | M4 UI | 2026-10-17 | `9ff9c98` |
-| M5 Deployment | 2026-10-17 (config + CI); hosting pending | `e2fcbcc` |
-| M6 Documentation | 2026-10-17 | `3b965c7` (tag `v1.0`) |
+| M5 Deployment | 2026-10-20 (live on Render + Vercel + Neon) | `a9f3cd4` |
+| M6 Documentation | 2026-10-21 | `3b965c7` (README); final commit tagged `v1.0` |
 
 ## F. If I had two more days
 
-1. **Deploy and run every listed edge case against the hosted instance.** A broken live link costs
-   more than any feature.
-2. **Idempotency keys on `POST /movements`.** A retried request after a timeout can double-post
+1. **Idempotency keys on `POST /movements`.** A retried request after a timeout can double-post
    stock today; this is the most realistic data-quality bug left.
-3. **Stock-take mode.** Enter counted quantities and generate `count_correction` adjustments in
+2. **Stock-take mode.** Enter counted quantities and generate `count_correction` adjustments in
    one transaction. It reuses existing rules, so it is cheap and high-value for the "40 vs 36 bags"
    story.
-4. **Component tests for the movement form,** the most logic-heavy page.
-5. **Running balances stored per movement (or a window-function query),** so the ledger stays fast
+3. **Component tests for the movement form,** the most logic-heavy page.
+4. **Running balances stored per movement (or a window-function query),** so the ledger stays fast
    as history grows.
+5. **Keep-warm or paid tier for the API.** The free-tier cold start (30–60 s) is the first thing a
+   reviewer sees. It is last because it is a hosting decision, not a code change.
 
 ## G. Self-assessment
 
@@ -99,7 +99,7 @@ Lesson: precision rules for stored derived values differ from those for user inp
 | Data modelling and persistence | 5 | CHECKs per movement type, UNIQUE reversal link, immutability triggers, indexes, exact decimals, migrations. |
 | API design | 4 | Resource paths, correct verbs and status codes, pagination, OpenAPI. Ledger pagination happens after an in-memory computation. |
 | UI usability | 4 | Inline validation, loading/error states, actionable messages, responsive CSS. Phone layout only briefly checked. |
-| Testing | 4 | 162 backend tests, 98 % coverage (99.5 % domain). Frontend tests cover helpers only. |
-| Deployment and operability | 3 | Dockerfiles, compose, render.yaml, vercel.json, migrate+seed and CI are committed, but not yet deployed or run under Docker locally. |
+| Testing | 4 | 163 backend tests, 98 % coverage (99.5 % domain). Frontend tests cover helpers only. |
+| Deployment and operability | 4 | Live on Render/Vercel/Neon from committed config; migrate+seed on start, health check, CI on SQLite and Postgres. It took three fixes to get live (Docker path, a stray word in DATABASE_URL, Vercel Drop), and docker compose was never run locally. |
 | Git hygiene | 3 | Milestone-tagged Conventional Commits with "why" bodies, but all made on one day rather than spread over the week. |
-| Documentation and write-up | 4 | README follows the required structure, with a rule→code→test map and honest limitations. Live links still placeholders. |
+| Documentation and write-up | 4 | README follows the required structure, with live links, a rule→code→test map, deploy lessons and honest limitations. |

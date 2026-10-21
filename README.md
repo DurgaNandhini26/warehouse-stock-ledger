@@ -10,10 +10,11 @@ ADJUSTMENT), and every balance, average cost and valuation can be recomputed fro
 
 | What | URL |
 |---|---|
-| UI | `https://<your-vercel-project>.vercel.app` *(fill in after deploying, see 5a)* |
-| API base URL | `https://<your-render-service>.onrender.com/api/v1` |
-| API docs (Swagger) | `https://<your-render-service>.onrender.com/docs` |
-| Health | `https://<your-render-service>.onrender.com/health` |
+| UI | https://warehouse-stock-ledger.vercel.app |
+| API base URL | https://stock-ledger-api-ec7c.onrender.com/api/v1 |
+| API docs (Swagger) | https://stock-ledger-api-ec7c.onrender.com/docs |
+| Health | https://stock-ledger-api-ec7c.onrender.com/health |
+| Repository | https://github.com/DurgaNandhini26/warehouse-stock-ledger |
 
 There is no login, so there are no test credentials. The API runs on Render's free tier, which
 sleeps after about 15 minutes idle. **The first request after a sleep can take 30–60 s.** If the
@@ -155,9 +156,16 @@ dashboard step listed here.
    On start the container runs `backend/docker-entrypoint.sh`: `python -m app.cli migrate`, then
    `python -m app.cli seed` (only seeds an empty DB), then uvicorn on `$PORT`. No SQL is run by
    hand. Render health-checks `/health`.
-3. **UI: Vercel**, from `frontend/vercel.json`. *Dashboard:* import the repo, set **Root
-   Directory = `frontend`**, add env var `VITE_API_BASE_URL` = the Render URL (no trailing slash),
-   deploy. Then put the Vercel URL into Render's `CORS_ORIGINS` (Render redeploys automatically).
+3. **UI: Vercel**, from `frontend/vercel.json`. *Dashboard:* Add New → Project → import the GitHub
+   repo (not "Vercel Drop", which uploads unbuilt files and serves 404s), set **Root
+   Directory = `frontend`**, deploy. The API URL comes from the committed
+   `frontend/.env.production`; a `VITE_API_BASE_URL` set in Vercel (type *Config*, not *Secret*,
+   because `VITE_` values are public) would override it. Then put the Vercel URL into Render's
+   `CORS_ORIGINS` and choose *Save, rebuild and deploy*.
+
+Lessons from the real deploy: paste the Neon string with nothing after it (a stray word ended up
+inside `channel_binding=` and the container could not connect), and use Neon's *direct*
+(non-pooled) connection string.
 
 **Redeploy after a code change:** push to `main`. Render (`autoDeploy: true`) and Vercel both
 rebuild on push. Migrations run automatically on container start.
@@ -176,7 +184,7 @@ first.
 
 ```bash
 cd backend
-.venv/bin/python -m pytest                                    # all 162 backend tests (~25 s)
+.venv/bin/python -m pytest                                    # all 163 backend tests (~25 s)
 sh ../scripts/coverage.sh                                     # tests + coverage -> backend/coverage.txt, htmlcov/
 TEST_DATABASE_URL=postgresql://user:pass@localhost:5432/ledger_test .venv/bin/python -m pytest   # same suite on Postgres
 cd ../frontend && npm test                                    # Vitest: formatting + inline validation helpers
@@ -360,9 +368,12 @@ service → *Logs*.
   * *Receive (IN)* with cost 0: inline error, and 422 `INVALID_UNIT_COST` from the API.
   * *History*: "Reverse…" on any movement. Reversing #28 again shows `ALREADY_REVERSED`.
   * *Products → a product*: running-balance ledger, per-bin view, CSV export.
-* **Race test from a shell** (two OUTs for the last 5 units; exactly one gets 201, the other 409):
+* **Race test from a shell:** two simultaneous OUTs that each ask for all 178 units of
+  TEA-DUST-250 in bin C-01 (seed data). Exactly one gets 201, the other 409
+  `INSUFFICIENT_STOCK`. Run it once, or re-seed first.
 
   ```bash
+  API=https://stock-ledger-api-ec7c.onrender.com
   for i in 1 2; do curl -s -o /dev/null -w "%{http_code}\n" -X POST "$API/api/v1/movements" \
     -H 'Content-Type: application/json' \
     -d '{"type":"OUT","product_id":8,"from_location_id":4,"quantity":"178","created_by":"race"}' & done; wait
@@ -370,12 +381,12 @@ service → *Logs*.
 
 ## 11. Known limitations
 
-* **Deployment is not done yet.** The repo contains everything needed (`render.yaml`,
-  `vercel.json`, Dockerfiles, entrypoint), but the live URLs in section 2 are placeholders until
-  the dashboard steps in 5a are carried out.
-* **Docker and the Postgres path were not run on the development machine** (no Docker installed).
-  The Postgres code path (row locks, triggers) is exercised by the CI Postgres job. Confirm that job
-  is green after the first push.
+* **Free-tier hosting:** the Render API sleeps after ~15 minutes idle (30–60 s cold start).
+  Neon's free tier also suspends compute when idle and resumes on the first query.
+* **Docker was never run on the development machine** (no Docker installed). The API image is
+  built and run by Render on every deploy. `docker compose up` itself was not tried locally. The
+  Postgres code path (row locks, triggers, concurrency tests) runs in the CI Postgres job and
+  against the hosted Neon database.
 * **SQLite mode serialises all transactions**, reads included (`BEGIN IMMEDIATE`). That is fine
   for local use and tests, but the hosted setup uses Postgres with per-product row locks.
 * **Ledger view computes running balances in Python** over all of a product's movements on each
