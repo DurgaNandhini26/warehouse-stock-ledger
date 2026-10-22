@@ -1,5 +1,5 @@
 import { type FormEvent, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ApiError, api } from "../api/client";
 import { MovementTable } from "../components/MovementTable";
 import { Pager } from "../components/Pager";
@@ -12,8 +12,15 @@ const PAGE = 100;
 
 export default function ProductLedgerPage() {
   const productId = Number(useParams().productId);
-  const [locationId, setLocationId] = useState("");
+  // ?location=<id> lets other pages (e.g. a click on the stock grid) open the ledger for one bin.
+  const [params, setParams] = useSearchParams();
+  const rawLocation = params.get("location") ?? "";
+  const locationId = /^[1-9]\d{0,9}$/.test(rawLocation) ? rawLocation : "";
   const [offset, setOffset] = useState(0);
+  const followLocation = (id: string) => {
+    setParams(id ? { location: id } : {}, { replace: true });
+    setOffset(0);
+  };
   const [version, setVersion] = useState(0);
 
   const valid = Number.isInteger(productId) && productId > 0;
@@ -77,7 +84,9 @@ export default function ProductLedgerPage() {
             <ul className="chips">
               {balances.data.items.map((b) => (
                 <li key={b.location_id}>
-                  <strong>{b.location_code}</strong> {formatQty(b.quantity, b.unit)}
+                  <Link to={`?location=${b.location_id}`} title={`Show the movements behind ${b.location_code}`}>
+                    <strong>{b.location_code}</strong> {formatQty(b.quantity, b.unit)}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -89,10 +98,7 @@ export default function ProductLedgerPage() {
               Follow
               <select
                 value={locationId}
-                onChange={(e) => {
-                  setLocationId(e.target.value);
-                  setOffset(0);
-                }}
+                onChange={(e) => followLocation(e.target.value)}
               >
                 <option value="">Whole warehouse</option>
                 {locations.data?.items.map((l) => (
@@ -103,6 +109,16 @@ export default function ProductLedgerPage() {
               </select>
             </label>
           </div>
+          {ledger.data!.location && (
+            <Notice kind="info">
+              Bin <strong>{ledger.data!.location.code}</strong> holds{" "}
+              <strong>{formatQty(ledger.data!.closing_balance, product.unit)}</strong>. The {ledger.data!.total}{" "}
+              movement(s) below add up to exactly that.{" "}
+              <button type="button" className="link" onClick={() => followLocation("")}>
+                Show whole warehouse
+              </button>
+            </Notice>
+          )}
           <p className="muted small">
             “Balance after” is recomputed from the movements themselves, so it explains the current figure
             ({formatQty(ledger.data!.closing_balance, product.unit)}). Transfers do not change the warehouse total.

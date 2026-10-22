@@ -22,7 +22,7 @@ export default function OverviewPage() {
       </div>
       <p className="muted">
         Current balance of every product in every bin. Every number here is the sum of recorded movements —
-        open a product to see the movements behind it.
+        click any number to see exactly which movements add up to it.
       </p>
       <ErrorBanner error={error} onRetry={reload} />
       {loading && !data && <Loading />}
@@ -59,7 +59,16 @@ export default function OverviewPage() {
                     const qty = row.quantities[String(loc.id)];
                     return (
                       <td key={loc.id} className="num">
-                        {qty ? formatQty(qty) : <span className="faint">·</span>}
+                        {qty ? (
+                          <Link
+                            to={`/products/${row.product_id}?location=${loc.id}`}
+                            title={`Explain this number: the movements behind ${row.sku} in ${loc.code}`}
+                          >
+                            {formatQty(qty)}
+                          </Link>
+                        ) : (
+                          <span className="faint">·</span>
+                        )}
                       </td>
                     );
                   })}
