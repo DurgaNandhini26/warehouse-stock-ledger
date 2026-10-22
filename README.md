@@ -362,6 +362,9 @@ service → *Logs*.
   UI's *Reconcile* page (or `GET /api/v1/reconciliation`) to see the drift, and press *Repair*
   (`POST /api/v1/reconciliation`). This is a CLI on purpose: there is no debug endpoint on the
   hosted API.
+* **"Why does the system say 40 bags?"** Click any number in the *Stock overview* grid. It opens
+  that product's ledger for that bin (`/products/{id}?location={bin}`), and the page states that
+  the listed movements add up to exactly the number clicked.
 * **Quick edge-case tour in the UI:**
   * *New movement → Dispatch (OUT)*: the form shows bin availability and blocks over-dispatch inline.
     The API also returns 409 `INSUFFICIENT_STOCK` if you bypass the UI.
